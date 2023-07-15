@@ -1,0 +1,16 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+Error
+{%endblock %}
+
+
+{% block body %}
+
+<h1>Error for the following Entry: {{ entry_name }}</h1>
+
+<div>
+  {{ message }}
+</div>
+
+{% endblock %}
