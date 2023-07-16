@@ -7,10 +7,10 @@ Error
 
 {% block body %}
 
-<h1>Error for the following Entry: {{ entry_name }}</h1>
+<h1>Error: {{ error_code }}</h1>
 
 <div>
-  {{ message }}
+  {{ error_message }}
 </div>
 
 {% endblock %}
