@@ -9,10 +9,12 @@ from markdown2 import Markdown
 from . import util
 
 
-# letting django render the forms
+# this form is no longer needed
+""" 
 class NewSearchForm(forms.Form):
     search_input = forms.CharField(label="", max_length=100, widget=forms.TextInput(
         attrs={'placeholder': 'Search Encyclopedia'}))
+"""
 
 
 class NewCreatePageForm(forms.Form):
@@ -27,58 +29,67 @@ class NewEditPageForm(forms.Form):
         attrs={'placeholder': 'Enter you content here'}))
 
 
+def error_page(request, error_code, error_message):
+    return render(request, "encyclopedia/error.html", {
+        "error_code": error_code,
+        "error_message": error_message
+    })
+
+
 def index(request):
     entries = util.list_entries()
 
     # if POST, then search was submitted
     if request.method == "POST":
+        """
+        changed the search form to be static, this is the old dynamic way
         form = NewSearchForm(request.POST)
-        # test_data = request.POST.get("search_input")
-        # print(test_data)
         if form.is_valid():
             search_input = form.cleaned_data["search_input"]
-            # redirect to entry if page exists
-            if util.get_entry(search_input):
-                for entry in entries:
-                    if entry.casefold() == search_input.casefold():
-                        return HttpResponseRedirect(reverse("entry", kwargs={'entry_name': entry}))
-
-            # no direct match
-            else:
-                potential_entries = []
-                pattern = re.compile(search_input, re.IGNORECASE)
-                for entry in entries:
-                    # print(pattern.search(entry))
-                    # look through all entries, if there is a match add it to the list
-                    if pattern.search(entry):
-                        potential_entries.append(entry)
-
-                return render(request, "encyclopedia/index.html", {
-                    "title": "No results for your search: " + search_input + ". Did you mean:",
-                    "entries": potential_entries,
-                    "searchform": NewSearchForm()
-                })
+        """
+        search_input = request.POST.get("search_input")
 
         # if input is not valid, go to error page
-        else:
+        if not search_input or len(search_input) > 100:
+            return error_page(request, "Your search request", "Not a valid input")
+            """
             return render(request, "encyclopedia/error.html", {
                 "error_code": "Your search request",
-                "error_message": "Error: Not a valid input",
-                "searchform": NewSearchForm()
+                "error_message": "Error: Not a valid input"
+            })
+            """
+
+        # redirect to entry if page exists
+        if util.get_entry(search_input):
+            for entry in entries:
+                if entry.casefold() == search_input.casefold():
+                    return HttpResponseRedirect(reverse("entry", kwargs={'entry_name': entry}))
+
+        # no direct match
+        else:
+            potential_entries = []
+            pattern = re.compile(search_input, re.IGNORECASE)
+            for entry in entries:
+                # look through all entries, if there is a match add it to the list
+                if pattern.search(entry):
+                    potential_entries.append(entry)
+
+            return render(request, "encyclopedia/index.html", {
+                "title": "No direct results for your search: " + search_input + ". Did you mean:",
+                "entries": potential_entries
             })
 
     # if GET just render homepage
-    return render(request, "encyclopedia/index.html", {
-        "title": "All Pages",
-        "entries": entries,
-        "searchform": NewSearchForm()
-    })
+    else:
+        return render(request, "encyclopedia/index.html", {
+            "title": "All Pages",
+            "entries": entries
+        })
 
 
 def entry(request, entry_name):
 
     # ERROR: Entry always gets called!!! - fixed with changed url
-    # print("this gets called")
 
     # check if entry exists
     realentry = util.get_entry(entry_name)
@@ -92,16 +103,17 @@ def entry(request, entry_name):
             if entry.casefold() == entry_name.casefold():
                 return render(request, "encyclopedia/entry.html", {
                     "entry_name": entry,
-                    "entry": entry_html,
-                    "searchform": NewSearchForm()
+                    "entry": entry_html
                 })
 
     else:
+        return error_page(request, entry_name, f"No page with the name {entry_name} exists!")
+        """ 
         return render(request, "encyclopedia/error.html", {
             "error_code": entry_name,
             "error_message": "No such entry exists!",
-            "searchform": NewSearchForm()
         })
+        """
 
 
 def edit_page(request, entry_name):
@@ -121,15 +133,10 @@ def edit_page(request, entry_name):
                 initial={"content": realentry})
             return render(request, "encyclopedia/editpage.html", {
                 "entry_name": entry_name,
-                "editpageform": EditForm,
-                "searchform": NewSearchForm()
+                "editpageform": EditForm
             })
         else:
-            return render(request, "encyclopedia/error.html", {
-                "error_code": entry_name,
-                "error_message": "No such entry exists!",
-                "searchform": NewSearchForm()
-            })
+            return error_page(request, entry_name, f"No page with the name {entry_name} exists!")
 
 
 def create_page(request):
@@ -143,11 +150,7 @@ def create_page(request):
 
             # if page already exists, don't commit
             if util.get_entry(title):
-                return render(request, "encyclopedia/error.html", {
-                    "error_code": "Page already exists",
-                    "error_message": "Page with same title already exsits in our database!",
-                    "searchform": NewSearchForm()
-                })
+                return error_page(request, "Page already exists", f"Page with the title {title} already exists in our database!")
             # if page doesn't exist, commit to db
             else:
                 util.save_entry(title, content)
@@ -155,17 +158,12 @@ def create_page(request):
 
         # if input is invalid
         else:
-            return render(request, "encyclopedia/error.html", {
-                "error_code": "Not a valid input",
-                "error_message": "Please check your input and submit again!",
-                "searchform": NewSearchForm()
-            })
+            return error_page(request, "Not a valid input", "Please check your input and submit again!")
 
     # if GET, just show page
     else:
         return render(request, "encyclopedia/createpage.html", {
-            "newpageform": NewCreatePageForm(),
-            "searchform": NewSearchForm()
+            "newpageform": NewCreatePageForm()
         })
 
 
