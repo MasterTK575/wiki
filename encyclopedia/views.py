@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 import re
 import random
+from markdown2 import Markdown
 
 from . import util
 
@@ -32,11 +33,15 @@ def index(request):
     # if POST, then search was submitted
     if request.method == "POST":
         form = NewSearchForm(request.POST)
+        # test_data = request.POST.get("search_input")
+        # print(test_data)
         if form.is_valid():
             search_input = form.cleaned_data["search_input"]
             # redirect to entry if page exists
             if util.get_entry(search_input):
-                return HttpResponseRedirect(reverse("entry", kwargs={'entry_name': search_input}))
+                for entry in entries:
+                    if entry.casefold() == search_input.casefold():
+                        return HttpResponseRedirect(reverse("entry", kwargs={'entry_name': entry}))
 
             # no direct match
             else:
@@ -79,11 +84,17 @@ def entry(request, entry_name):
     realentry = util.get_entry(entry_name)
     # if the entry exists, render the page
     if realentry:
-        return render(request, "encyclopedia/entry.html", {
-            "entry_name": entry_name,
-            "entry": realentry,
-            "searchform": NewSearchForm()
-        })
+        markdowner = Markdown()
+        entry_html = markdowner.convert(realentry)
+        entries = util.list_entries()
+        # to get the actual file name with correct capitalization
+        for entry in entries:
+            if entry.casefold() == entry_name.casefold():
+                return render(request, "encyclopedia/entry.html", {
+                    "entry_name": entry,
+                    "entry": entry_html,
+                    "searchform": NewSearchForm()
+                })
 
     else:
         return render(request, "encyclopedia/error.html", {

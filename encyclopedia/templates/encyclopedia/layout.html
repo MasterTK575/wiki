@@ -15,9 +15,7 @@
                 <form action="{% url 'index'%}" method="post">
                     {% csrf_token %}
                     {{ searchform }}
-                     <!--
-                        <input class="search" type="text" name="search_input" placeholder="Search Encyclopedia">
-                     -->
+                    <!--<input class="search" type="text" name="search_input" placeholder="Search Encyclopedia">-->
                     <input type="submit" value="Submit">
                     
                 </form>

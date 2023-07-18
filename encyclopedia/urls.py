@@ -11,5 +11,5 @@ urlpatterns = [
     path("randompage", views.random_page, name="random_page"),
     # to dynamically create pages for every possible entry
     # if you don't include the prefix pages/, then views.entry will get called on every url!
-    path("pages/<str:entry_name>", views.entry, name="entry")
+    path("wiki/<str:entry_name>", views.entry, name="entry")
 ]

@@ -7,10 +7,8 @@ Encyclopedia
 
 {% block body %}
 
-<h1>This is the Entry for: {{ entry_name }}</h1>
-
 <div>
-  {{ entry }}
+  {{ entry|safe }}
 </div>
 <div>
   <a href="{% url 'edit_page' entry_name%}">Edit Page</a>
