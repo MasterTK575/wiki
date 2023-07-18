@@ -12,5 +12,8 @@ Encyclopedia
 <div>
   {{ entry }}
 </div>
+<div>
+  <a href="{% url 'edit_page' entry_name%}">Edit Page</a>
+</div>
 
 {% endblock %}

@@ -6,4 +6,6 @@ It does the following:
 - Test 3
 
 ## Other interesting stuff:
-....
+1. Interesting fact number 1
+2. Interesting fact number 2
+3. Fact number 3

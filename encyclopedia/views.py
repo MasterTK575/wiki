@@ -3,6 +3,7 @@ from django import forms
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import re
+import random
 
 from . import util
 
@@ -16,6 +17,11 @@ class NewSearchForm(forms.Form):
 class NewCreatePageForm(forms.Form):
     title = forms.CharField(label="", max_length=100, widget=forms.TextInput(
         attrs={'placeholder': 'Title'}))
+    content = forms.CharField(label="", widget=forms.Textarea(
+        attrs={'placeholder': 'Enter you content here'}))
+
+
+class NewEditPageForm(forms.Form):
     content = forms.CharField(label="", widget=forms.Textarea(
         attrs={'placeholder': 'Enter you content here'}))
 
@@ -87,6 +93,34 @@ def entry(request, entry_name):
         })
 
 
+def edit_page(request, entry_name):
+    # if POST, page was edited
+    if request.method == "POST":
+        form = NewEditPageForm(request.POST)
+        if form.is_valid():
+            content_updated = form.cleaned_data["content"]
+            util.save_entry(entry_name, content_updated)
+            return HttpResponseRedirect(reverse("entry", kwargs={'entry_name': entry_name}))
+
+    # if GET, display edit page
+    else:
+        realentry = util.get_entry(entry_name)
+        if realentry:
+            EditForm = NewEditPageForm(
+                initial={"content": realentry})
+            return render(request, "encyclopedia/editpage.html", {
+                "entry_name": entry_name,
+                "editpageform": EditForm,
+                "searchform": NewSearchForm()
+            })
+        else:
+            return render(request, "encyclopedia/error.html", {
+                "error_code": entry_name,
+                "error_message": "No such entry exists!",
+                "searchform": NewSearchForm()
+            })
+
+
 def create_page(request):
 
     # if POST, commit form input
@@ -122,3 +156,10 @@ def create_page(request):
             "newpageform": NewCreatePageForm(),
             "searchform": NewSearchForm()
         })
+
+
+# get a random number between 0 and amount of entries, then choose entry based on that number
+def random_page(request):
+    entries = util.list_entries()
+    number = random.randint(0, len(entries)-1)
+    return HttpResponseRedirect(reverse("entry", kwargs={'entry_name': entries[number]}))
