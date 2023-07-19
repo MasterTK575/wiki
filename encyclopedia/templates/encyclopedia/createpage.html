@@ -2,20 +2,17 @@
 
 {% block title %}
 Create New Page
-{%endblock %}
-
+{% endblock %}
 
 {% block body %}
-
-<h1>Create a new Page here!</h1>
-
-<div class="row">
-    <form action="{% url 'create_page'%}" method="post">
-        {% csrf_token %}
-        {{ newpageform }}
-        <input type="submit" value="Submit">
-        
-    </form>
+<div class="container mt-5">
+    <h1 class="entry-heading text-center">Create a new Page here!</h1>
+    <div class="row justify-content-center"> <!-- Center the form using justify-content-center class -->
+        <form class="col-md-8" action="{% url 'create_page' %}" method="post">
+            {% csrf_token %}
+            {{ newpageform }}
+            <input type="submit" value="Submit">
+        </form>
+    </div>
 </div>
-
 {% endblock %}

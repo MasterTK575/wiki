@@ -2,22 +2,22 @@
 
 {% block title %}
 Encyclopedia
-{%endblock %} 
-
+{% endblock %}
 
 {% block body %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ title }}</h1>
 
-<h1>{{ title }}</h1>
-
-<ul>
-  <!--
-    Look up url for path named entry, then pass in the entry do get the dynamic page
-  --> 
-  {% for entry in entries %}
-  <li><a href="{% url 'entry' entry%}">{{ entry }}</a></li>
-  {% empty %}
-  <li>Seems like there are no matches for your search!</li>
-  {% endfor %}
-</ul>
-
+    <ul class="entry-list"> <!-- Added the entry-list class here -->
+        {% for entry in entries %}
+        <li>
+            <a href="{% url 'entry' entry %}" class="text-decoration-none">{{ entry }}</a>
+        </li>
+        {% empty %}
+        <li class="text-center">No matches found for your search!</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
+
+
